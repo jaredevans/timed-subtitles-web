@@ -1,0 +1,6 @@
+node_modules
+dist
+public/ffmpeg
+about.txt
+je-intro.mov
+.vite

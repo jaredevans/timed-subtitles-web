@@ -1,0 +1,455 @@
+* {
+  box-sizing: border-box;
+}
+
+.app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem 3rem;
+}
+
+/* ---------- header ---------- */
+
+header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin: 0 -1.5rem 1.25rem;
+  padding: 0.85rem 1.5rem;
+  background: rgba(15, 17, 23, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+
+header h1 {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.progress {
+  font-family: var(--font-mono);
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.confirm-reset {
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
+  color: var(--red);
+  background: var(--red-tint);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  border-radius: 999px;
+  padding: 0.3rem 0.4rem 0.3rem 0.9rem;
+  font-size: 0.9rem;
+}
+
+/* ---------- layout ---------- */
+
+main {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  main {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- cards ---------- */
+
+.video-panel,
+.timing-controls,
+.setup-panel,
+.line-list {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1rem;
+}
+
+.setup-panel h2,
+.line-list h2 {
+  font-family: var(--font-display);
+  margin: 0 0 0.6rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* ---------- buttons ---------- */
+
+button {
+  font: inherit;
+  color: var(--text);
+  padding: 0.45rem 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  cursor: pointer;
+  transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+button:hover:not(:disabled) {
+  background: #262b3b;
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.reset-all-btn {
+  background: transparent;
+  color: var(--text-dim);
+}
+
+.reset-all-btn:hover:not(:disabled) {
+  background: var(--red-tint);
+  border-color: rgba(248, 113, 113, 0.4);
+  color: var(--red);
+}
+
+/* filled buttons — keep after the base hover rule so these win */
+
+.setup-panel button {
+  margin-top: 0.75rem;
+  background: var(--accent);
+  border-color: transparent;
+  color: var(--on-accent);
+  font-weight: 600;
+}
+
+.setup-panel button:hover:not(:disabled) {
+  background: var(--accent-hover);
+  border-color: transparent;
+}
+
+.start-btn {
+  background: var(--green);
+  border-color: transparent;
+  color: var(--on-green);
+  font-weight: 600;
+}
+
+.start-btn:hover:not(:disabled) {
+  background: var(--green);
+  border-color: transparent;
+  filter: brightness(1.1);
+}
+
+.end-btn {
+  background: var(--red);
+  border-color: transparent;
+  color: var(--on-red);
+  font-weight: 600;
+}
+
+.end-btn:hover:not(:disabled) {
+  background: var(--red);
+  border-color: transparent;
+  filter: brightness(1.1);
+}
+
+/* ---------- shared text ---------- */
+
+.hint {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+
+.error {
+  color: var(--red);
+  margin: 0.6rem 0 0;
+}
+
+/* ---------- video panel ---------- */
+
+.video-panel video {
+  display: block;
+  width: 100%;
+  border-radius: 8px;
+  background: #000;
+}
+
+.video-placeholder {
+  border: 2px dashed rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius);
+  padding: 3rem 1.5rem;
+  text-align: center;
+}
+
+.file-label {
+  display: inline-block;
+  padding: 0.55rem 1.2rem;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+
+.file-label:hover {
+  background: var(--accent-hover);
+}
+
+.file-label input {
+  display: none;
+}
+
+.video-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.6rem;
+}
+
+.video-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-dim);
+}
+
+.change-video {
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  transition: color 150ms ease;
+}
+
+.change-video:hover {
+  color: var(--accent);
+}
+
+.change-video input {
+  display: none;
+}
+
+/* ---------- timing controls ---------- */
+
+.timing-controls {
+  margin-top: 1rem;
+}
+
+.line-number {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--text-dim);
+}
+
+.caption-band {
+  width: fit-content;
+  max-width: 100%;
+  margin: 0.5rem auto 0;
+  padding: 0.7rem 1.2rem;
+  border-radius: 6px;
+  background: var(--band);
+  color: var(--caption);
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-align: center;
+  overflow-wrap: break-word;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .caption-band {
+    animation: caption-in 150ms ease;
+  }
+}
+
+@keyframes caption-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.capture-buttons {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.9rem;
+}
+
+.capture-buttons button {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.7rem;
+  font-size: 1rem;
+}
+
+.mark-time {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-size: 0.85em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- setup panel ---------- */
+
+.setup-panel textarea {
+  width: 100%;
+  font: inherit;
+  color: var(--text);
+  padding: 0.7rem 0.8rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  resize: vertical;
+  transition: border-color 150ms ease;
+}
+
+.setup-panel textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* ---------- line list ---------- */
+
+.line-list ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 70vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+}
+
+.line-list ol::-webkit-scrollbar {
+  width: 8px;
+}
+
+.line-list ol::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+}
+
+.line-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  border-left: 3px solid transparent;
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+
+.line-list li:hover {
+  background: var(--surface-2);
+}
+
+.line-list li.active {
+  border-left-color: var(--accent);
+  background: var(--accent-tint);
+}
+
+.line-list li.done > .line-text {
+  color: var(--green);
+}
+
+.line-list li > .line-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.line-list .times {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.line-list input {
+  width: 5.5rem;
+  font: inherit;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--text);
+  padding: 0.2rem 0.35rem;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  border-radius: 6px;
+  font-variant-numeric: tabular-nums;
+  transition: border-color 150ms ease;
+}
+
+.line-list input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.overlap {
+  color: var(--amber);
+}
+
+/* ---------- misc ---------- */
+
+.privacy-note {
+  color: var(--green);
+  opacity: 0.8;
+  font-size: 0.85rem;
+  margin: 0.6rem 0 0;
+}
+
+.video-placeholder .privacy-note {
+  margin-top: 1.2rem;
+}
+
+.export-mp4 {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.export-error {
+  color: var(--red);
+  font-size: 0.85rem;
+}
