@@ -1,0 +1,37 @@
+@import '@fontsource/bricolage-grotesque/600.css';
+@import '@fontsource/bricolage-grotesque/700.css';
+@import '@fontsource/jetbrains-mono/400.css';
+
+:root {
+  color-scheme: dark;
+
+  --bg: #0f1117;
+  --surface: #171a23;
+  --surface-2: #1f2330;
+  --border: rgba(255, 255, 255, 0.08);
+  --text: #e5e7ef;
+  --text-dim: #9aa1b5;
+  --accent: #818cf8;
+  --accent-hover: #93a0ff;
+  --accent-tint: rgba(129, 140, 248, 0.12);
+  --on-accent: #14162b;
+  --green: #34d399;
+  --on-green: #06251a;
+  --red: #f87171;
+  --on-red: #2b0b0b;
+  --red-tint: rgba(248, 113, 113, 0.12);
+  --amber: #fbbf24;
+  --radius: 12px;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.25);
+  --band: rgba(8, 9, 12, 0.88);
+  --caption: #f8f8f2;
+  --font-display: 'Bricolage Grotesque', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, sans-serif;
+}
