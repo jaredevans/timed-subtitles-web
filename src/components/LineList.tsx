@@ -1,4 +1,6 @@
+import { useEffect, useRef } from 'react';
 import type { SubtitleLine } from '../types';
+import { computeAutoScrollTop } from '../lib/autoscroll';
 
 interface Props {
   lines: SubtitleLine[];
@@ -37,10 +39,33 @@ function lineStatus(line: SubtitleLine): 'done' | 'partial' | 'untimed' {
 }
 
 export function LineList({ lines, activeIndex, onSelect, onEditTime }: Props) {
+  const listRef = useRef<HTMLOListElement | null>(null);
+
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
+
+    const listRect = list.getBoundingClientRect();
+    const originTop = listRect.top + list.clientTop;
+    const items = Array.from(list.children).map((child) => {
+      const rect = child.getBoundingClientRect();
+      return {
+        top: rect.top - originTop + list.scrollTop,
+        bottom: rect.bottom - originTop + list.scrollTop,
+      };
+    });
+
+    const nextTop = computeAutoScrollTop(items, activeIndex, list.scrollTop, list.clientHeight);
+    if (nextTop === null) return;
+
+    const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    list.scrollTo({ top: nextTop, behavior: reducedMotion ? 'auto' : 'smooth' });
+  }, [activeIndex, lines.length]);
+
   return (
     <section className="line-list">
       <h2>Captions</h2>
-      <ol>
+      <ol ref={listRef}>
         {lines.map((line, i) => {
           const prev = i > 0 ? lines[i - 1] : undefined;
           const overlaps =

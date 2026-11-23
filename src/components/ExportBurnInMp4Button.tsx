@@ -117,7 +117,7 @@ export function ExportBurnInMp4Button({
           ? phase === 'encoding'
             ? `Encoding… ${percent}%`
             : PHASE_LABEL[phase]
-          : 'Export Burn-In subtitled MP4'}
+          : 'Export Burn-in'}
       </button>
       {error && (
         <span className="export-error" role="alert">

@@ -5,7 +5,7 @@ import { generateSrt } from './lib/srt';
 import { generateVtt } from './lib/vtt';
 import { clearState, loadState, saveState } from './lib/storage';
 import { SetupPanel } from './components/SetupPanel';
-import { VideoPanel } from './components/VideoPanel';
+import { VideoInfoBar, VideoPanel } from './components/VideoPanel';
 import { TimingControls } from './components/TimingControls';
 import { LineList } from './components/LineList';
 import { ExportMp4Button } from './components/ExportMp4Button';
@@ -225,11 +225,17 @@ export default function App() {
           )}
         </div>
       </header>
-      <main>
+      <main className={videoUrl ? 'has-video' : undefined}>
+        {videoUrl && (
+          <VideoInfoBar
+            videoName={videoName}
+            videoRef={videoRef}
+            onFileSelected={handleFileSelected}
+          />
+        )}
         <div className="left">
           <VideoPanel
             videoUrl={videoUrl}
-            videoName={videoName}
             videoRef={videoRef}
             onFileSelected={handleFileSelected}
             showReselectHint={restored && !videoUrl}

@@ -17,15 +17,16 @@ the right, and the export buttons across the top.](timed_subtitles.png)
 3. Paste your transcript. Pasted text is automatically split so each sentence
    becomes its own caption (existing line breaks are kept); edit freely, then
    click **Start timing**.
-4. Play the video. The current caption is shown as an on-screen caption band
-   under the video. For each caption: click **Mark start** when it begins,
-   **Mark end** when it finishes. The next caption loads automatically.
+4. Play the video (press `Space` to play/pause). The current caption is shown
+   as an on-screen caption band under the video. For each caption: click **Mark
+   start** (or press `,`) when it begins, **Mark end** (or press `.`) when it
+   finishes. The next caption loads automatically.
    Use **⟲ 3s** to rewind, or click any caption in the list to re-time it.
    Times can also be edited directly in the list.
 5. When every caption is timed, click **Export SRT** or **Export VTT** for a
-   subtitle file, **Export Soft-subtitled MP4** to get a video with the
-   subtitles embedded as a track (see below), or **Export Burn-In subtitled
-   MP4** to burn the captions into the picture itself, so they show up
+   subtitle file, **Export Soft** to get a video with the
+   subtitles embedded as a track (see below), or **Export Burn-in** to burn the
+   captions into the picture itself, so they show up
    everywhere — including players that strip subtitle tracks (see below).
    `.vtt` is the format used by HTML `<track>` elements.
 
@@ -36,9 +37,9 @@ linger on shared machines — export before stepping away for long. **Reset
 all** (top right) clears the video, transcript, and saved progress
 immediately, which is the safest habit on a shared computer.
 
-## Export Soft-subtitled MP4 (subtitles embedded)
+## Export Soft (subtitles embedded)
 
-**Export Soft-subtitled MP4** produces a copy of your video with the subtitles
+**Export Soft** produces a copy of your video with the subtitles
 embedded as a `mov_text` (tx3g) track, marked as the default track. This is the
 format **QuickTime Player** on macOS needs — it does not load sidecar `.srt`
 files, but it shows an embedded track (View → Subtitles). VLC and IINA read
@@ -50,9 +51,9 @@ a CDN); it's cached afterward. Because it's a remux (no re-encode), it's fast an
 lossless. Very large files may hit browser memory limits — **Export SRT** and
 **Export VTT** always work regardless.
 
-## Export Burn-In subtitled MP4 (captions in the picture)
+## Export Burn-in (captions in the picture)
 
-**Export Burn-In subtitled MP4** re-encodes every frame of your video with the
+**Export Burn-in** re-encodes every frame of your video with the
 subtitles drawn directly into the picture, using x264 in the browser via
 ffmpeg.wasm — nothing is uploaded. Unlike the soft-subtitle export, this isn't
 a remux: it's a full re-encode, so it's much slower — expect minutes rather

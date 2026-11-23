@@ -66,18 +66,78 @@ header h1 {
 main {
   display: grid;
   grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
-  gap: 1.5rem;
+  column-gap: 1.5rem;
+  row-gap: 1rem;
   align-items: start;
+}
+
+.video-info {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.left {
+  grid-column: 1;
+}
+
+.right {
+  grid-column: 2;
+}
+
+main.has-video .left,
+main.has-video .right {
+  grid-row: 2;
+}
+
+main.has-video .right {
+  position: relative;
+  align-self: stretch;
+}
+
+main.has-video .line-list {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+main.has-video .line-list ol {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
 }
 
 @media (max-width: 900px) {
   main {
     grid-template-columns: 1fr;
   }
+
+  .video-info,
+  .left,
+  .right,
+  main.has-video .left,
+  main.has-video .right {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  main.has-video .right {
+    align-self: start;
+  }
+
+  main.has-video .line-list {
+    position: static;
+    inset: auto;
+  }
+
+  main.has-video .line-list ol {
+    max-height: 70vh;
+  }
 }
 
 /* ---------- cards ---------- */
 
+.video-info,
 .video-panel,
 .timing-controls,
 .setup-panel,
@@ -233,7 +293,6 @@ button:disabled {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-top: 0.6rem;
 }
 
 .video-name {
@@ -325,6 +384,17 @@ button:disabled {
   font-weight: 400;
   font-size: 0.85em;
   font-variant-numeric: tabular-nums;
+}
+
+.shortcut-key {
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  font-weight: 600;
+  line-height: 1;
+  padding: 0.2em 0.45em;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.14);
+  border: 1px solid rgba(0, 0, 0, 0.18);
 }
 
 /* ---------- setup panel ---------- */

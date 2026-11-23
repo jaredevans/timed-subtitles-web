@@ -79,7 +79,7 @@ export function ExportMp4Button({
   return (
     <span className="export-mp4">
       <button disabled={disabled} onClick={handleClick} title={title}>
-        {busy && phase ? PHASE_LABEL[phase] : 'Export Soft-subtitled MP4'}
+        {busy && phase ? PHASE_LABEL[phase] : 'Export Soft'}
       </button>
       {error && (
         <span className="export-error" role="alert">
