@@ -21,6 +21,7 @@
   --on-red: #2b0b0b;
   --red-tint: rgba(248, 113, 113, 0.12);
   --amber: #fbbf24;
+  --amber-tint: rgba(251, 191, 36, 0.12);
   --radius: 12px;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.25);
   --band: rgba(8, 9, 12, 0.88);

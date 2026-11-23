@@ -4,6 +4,7 @@ import { parseTranscript } from './lib/transcript';
 import { generateSrt } from './lib/srt';
 import { generateVtt } from './lib/vtt';
 import { clearState, loadState, saveState } from './lib/storage';
+import { clearTimings, linesToTranscript, nextCaptionIndex } from './lib/timing';
 import { SetupPanel } from './components/SetupPanel';
 import { VideoInfoBar, VideoPanel } from './components/VideoPanel';
 import { TimingControls } from './components/TimingControls';
@@ -14,16 +15,6 @@ import './App.css';
 
 type Phase = 'setup' | 'timing';
 
-function nextUntimed(lines: SubtitleLine[], from: number): number {
-  for (let i = from + 1; i < lines.length; i++) {
-    if (lines[i].start === null || lines[i].end === null) return i;
-  }
-  for (let i = 0; i <= from; i++) {
-    if (lines[i].start === null || lines[i].end === null) return i;
-  }
-  return from;
-}
-
 export default function App() {
   const [phase, setPhase] = useState<Phase>('setup');
   const [lines, setLines] = useState<SubtitleLine[]>([]);
@@ -32,9 +23,12 @@ export default function App() {
   const [videoName, setVideoName] = useState('');
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [captureError, setCaptureError] = useState<string | null>(null);
+  const [awaitingStart, setAwaitingStart] = useState(false);
   const [confirmingReset, setConfirmingReset] = useState(false);
+  const [confirmingResetTimings, setConfirmingResetTimings] = useState(false);
   const [confirmingResetAll, setConfirmingResetAll] = useState(false);
   const [setupKey, setSetupKey] = useState(0);
+  const [initialTranscript, setInitialTranscript] = useState('');
   const [restored, setRestored] = useState(false);
   const [exporting, setExporting] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -68,6 +62,7 @@ export default function App() {
     setLines(parsed.map((t) => ({ text: t, start: null, end: null })));
     setActiveIndex(0);
     setCaptureError(null);
+    setAwaitingStart(false);
     setPhase('timing');
   }
 
@@ -76,6 +71,7 @@ export default function App() {
     if (!video) return;
     const t = video.currentTime;
     setCaptureError(null);
+    setAwaitingStart(false);
     setLines((ls) =>
       ls.map((l, i) =>
         i === activeIndex ? { ...l, start: t, end: l.end !== null && l.end <= t ? null : l.end } : l,
@@ -88,7 +84,7 @@ export default function App() {
     if (!video) return;
     const t = video.currentTime;
     const line = lines[activeIndex];
-    if (!line || line.start === null) return;
+    if (!line || line.start === null || awaitingStart) return;
     if (t <= line.start) {
       setCaptureError('The end must come after the start — keep playing, then mark the end.');
       return;
@@ -96,16 +92,21 @@ export default function App() {
     setCaptureError(null);
     const updated = lines.map((l, i) => (i === activeIndex ? { ...l, end: t } : l));
     setLines(updated);
-    setActiveIndex(nextUntimed(updated, activeIndex));
+    setActiveIndex(nextCaptionIndex(updated, activeIndex));
+    setAwaitingStart(true);
   }
 
   function handleSelectLine(index: number) {
     setActiveIndex(index);
     setCaptureError(null);
+    setAwaitingStart(false);
   }
 
   function handleEditTime(index: number, field: 'start' | 'end', value: number | null) {
     setLines((ls) => ls.map((l, i) => (i === index ? { ...l, [field]: value } : l)));
+    if (index === activeIndex && field === 'start') {
+      setAwaitingStart(false);
+    }
   }
 
   function downloadSubtitles(content: string, extension: string, mimeType: string) {
@@ -136,19 +137,41 @@ export default function App() {
     };
   }
 
-  function handleResetTranscript() {
+  function handleResetTimings() {
+    setLines((ls) => clearTimings(ls));
+    setActiveIndex(0);
+    setCaptureError(null);
+    setAwaitingStart(false);
+    setConfirmingResetTimings(false);
+  }
+
+  function handleEditTranscript() {
+    setInitialTranscript(linesToTranscript(lines));
     clearState();
     setLines([]);
     setActiveIndex(0);
     setCaptureError(null);
+    setAwaitingStart(false);
     setConfirmingReset(false);
+    setConfirmingResetTimings(false);
     setConfirmingResetAll(false);
     setRestored(false);
+    setSetupKey((k) => k + 1);
     setPhase('setup');
   }
 
   function handleResetAll() {
-    handleResetTranscript();
+    clearState();
+    setInitialTranscript('');
+    setLines([]);
+    setActiveIndex(0);
+    setCaptureError(null);
+    setAwaitingStart(false);
+    setConfirmingReset(false);
+    setConfirmingResetTimings(false);
+    setConfirmingResetAll(false);
+    setRestored(false);
+    setPhase('setup');
     if (videoUrl) URL.revokeObjectURL(videoUrl);
     setVideoUrl(null);
     setVideoName('');
@@ -161,6 +184,7 @@ export default function App() {
   }
 
   const allTimed = lines.length > 0 && lines.every((l) => l.start !== null && l.end !== null);
+  const hasAnyTiming = lines.some((l) => l.start !== null || l.end !== null);
   const timedCount = lines.filter((l) => l.start !== null && l.end !== null).length;
   const activeLine = lines[activeIndex];
 
@@ -176,21 +200,61 @@ export default function App() {
               <button onClick={() => setConfirmingResetAll(false)}>Cancel</button>
             </span>
           ) : (
-            <button className="reset-all-btn" onClick={() => setConfirmingResetAll(true)}>Reset all</button>
+            <button
+              className="reset-all-btn"
+              onClick={() => {
+                setConfirmingResetAll(true);
+                setConfirmingReset(false);
+                setConfirmingResetTimings(false);
+              }}
+            >
+              Reset all
+            </button>
           )}
           {phase === 'timing' && (
             <>
               <span className="progress">
                 {timedCount} / {lines.length} captions timed
               </span>
+              {confirmingResetTimings ? (
+                <span className="confirm-reset">
+                  Clears all timings.
+                  <button onClick={handleResetTimings}>Reset</button>
+                  <button onClick={() => setConfirmingResetTimings(false)}>Cancel</button>
+                </span>
+              ) : (
+                <button
+                  disabled={!hasAnyTiming}
+                  onClick={() => {
+                    setConfirmingResetTimings(true);
+                    setConfirmingReset(false);
+                    setConfirmingResetAll(false);
+                  }}
+                  title={hasAnyTiming ? undefined : 'No timings to reset'}
+                >
+                  Reset timings
+                </button>
+              )}
               {confirmingReset ? (
                 <span className="confirm-reset">
                   Resets all timings.
-                  <button onClick={handleResetTranscript}>Reset</button>
+                  <button onClick={handleEditTranscript}>Edit</button>
                   <button onClick={() => setConfirmingReset(false)}>Cancel</button>
                 </span>
               ) : (
-                <button onClick={() => setConfirmingReset(true)}>Edit transcript</button>
+                <button
+                  onClick={() => {
+                    if (!hasAnyTiming) {
+                      handleEditTranscript();
+                    } else {
+                      setConfirmingReset(true);
+                      setConfirmingResetTimings(false);
+                      setConfirmingResetAll(false);
+                    }
+                  }}
+                >
+                  Edit transcript
+                </button>
               )}
               <button
                 disabled={!allTimed}
@@ -245,6 +309,7 @@ export default function App() {
               line={activeLine}
               index={activeIndex}
               total={lines.length}
+              awaitingStart={awaitingStart}
               error={captureError}
               onCaptureStart={captureStart}
               onCaptureEnd={captureEnd}
@@ -253,7 +318,11 @@ export default function App() {
         </div>
         <div className="right">
           {phase === 'setup' ? (
-            <SetupPanel key={setupKey} onStartTiming={handleStartTiming} />
+            <SetupPanel
+              key={setupKey}
+              initialText={initialTranscript}
+              onStartTiming={handleStartTiming}
+            />
           ) : (
             <LineList
               lines={lines}

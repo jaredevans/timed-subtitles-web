@@ -456,13 +456,17 @@ button:disabled {
   background: var(--surface-2);
 }
 
-.line-list li.active {
-  border-left-color: var(--accent);
-  background: var(--accent-tint);
-}
-
 .line-list li.done > .line-text {
   color: var(--green);
+}
+
+.line-list li.active {
+  border-left-color: var(--amber);
+  background: var(--amber-tint);
+}
+
+.line-list li.active > .line-text {
+  color: var(--amber);
 }
 
 .line-list li > .line-text {

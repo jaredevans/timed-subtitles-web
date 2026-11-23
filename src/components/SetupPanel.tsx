@@ -2,11 +2,12 @@ import { useState, type ClipboardEvent } from 'react';
 import { splitIntoSentences } from '../lib/transcript';
 
 interface Props {
+  initialText?: string;
   onStartTiming: (transcript: string) => void;
 }
 
-export function SetupPanel({ onStartTiming }: Props) {
-  const [text, setText] = useState('');
+export function SetupPanel({ initialText = '', onStartTiming }: Props) {
+  const [text, setText] = useState(initialText);
   const canStart = text.trim().length > 0;
 
   function handlePaste(e: ClipboardEvent<HTMLTextAreaElement>) {
