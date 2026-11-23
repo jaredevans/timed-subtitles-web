@@ -39,6 +39,8 @@ interface Props {
   videoUrl: string | null;
   videoRef: RefObject<HTMLVideoElement | null>;
   onFileSelected: (file: File) => void;
+  onSeek?: () => void;
+  onTimeUpdate?: () => void;
   showReselectHint: boolean;
 }
 
@@ -46,6 +48,8 @@ export function VideoPanel({
   videoUrl,
   videoRef,
   onFileSelected,
+  onSeek,
+  onTimeUpdate,
   showReselectHint,
 }: Props) {
   useEffect(() => {
@@ -115,7 +119,14 @@ export function VideoPanel({
 
   return (
     <section className="video-panel">
-      <video ref={videoRef} src={videoUrl} controls />
+      <video
+        ref={videoRef}
+        src={videoUrl}
+        controls
+        onSeeking={onSeek}
+        onSeeked={onSeek}
+        onTimeUpdate={onTimeUpdate}
+      />
     </section>
   );
 }

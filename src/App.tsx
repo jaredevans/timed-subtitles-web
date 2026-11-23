@@ -4,7 +4,13 @@ import { parseTranscript } from './lib/transcript';
 import { generateSrt } from './lib/srt';
 import { generateVtt } from './lib/vtt';
 import { clearState, loadState, saveState } from './lib/storage';
-import { clearTimings, linesToTranscript, nextCaptionIndex } from './lib/timing';
+import {
+  clearTimings,
+  findCaptionIndexAtTime,
+  findPlayingCaptionIndex,
+  linesToTranscript,
+  nextCaptionIndex,
+} from './lib/timing';
 import { SetupPanel } from './components/SetupPanel';
 import { VideoInfoBar, VideoPanel } from './components/VideoPanel';
 import { TimingControls } from './components/TimingControls';
@@ -24,6 +30,7 @@ export default function App() {
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [captureError, setCaptureError] = useState<string | null>(null);
   const [awaitingStart, setAwaitingStart] = useState(false);
+  const [isMarking, setIsMarking] = useState(false);
   const [confirmingReset, setConfirmingReset] = useState(false);
   const [confirmingResetTimings, setConfirmingResetTimings] = useState(false);
   const [confirmingResetAll, setConfirmingResetAll] = useState(false);
@@ -63,6 +70,7 @@ export default function App() {
     setActiveIndex(0);
     setCaptureError(null);
     setAwaitingStart(false);
+    setIsMarking(false);
     setPhase('timing');
   }
 
@@ -72,6 +80,7 @@ export default function App() {
     const t = video.currentTime;
     setCaptureError(null);
     setAwaitingStart(false);
+    setIsMarking(true);
     setLines((ls) =>
       ls.map((l, i) =>
         i === activeIndex ? { ...l, start: t, end: l.end !== null && l.end <= t ? null : l.end } : l,
@@ -94,10 +103,33 @@ export default function App() {
     setLines(updated);
     setActiveIndex(nextCaptionIndex(updated, activeIndex));
     setAwaitingStart(true);
+    setIsMarking(false);
   }
 
   function handleSelectLine(index: number) {
     setActiveIndex(index);
+    setCaptureError(null);
+    setAwaitingStart(false);
+    setIsMarking(false);
+  }
+
+  function handleVideoSeek() {
+    const video = videoRef.current;
+    if (!video || phase !== 'timing') return;
+    const matched = findCaptionIndexAtTime(lines, video.currentTime);
+    if (matched === null || matched === activeIndex) return;
+    setActiveIndex(matched);
+    setCaptureError(null);
+    setAwaitingStart(false);
+    setIsMarking(false);
+  }
+
+  function handleVideoTimeUpdate() {
+    const video = videoRef.current;
+    if (!video || video.paused || phase !== 'timing' || isMarking) return;
+    const matched = findPlayingCaptionIndex(lines, video.currentTime);
+    if (matched === null || matched === activeIndex) return;
+    setActiveIndex(matched);
     setCaptureError(null);
     setAwaitingStart(false);
   }
@@ -142,6 +174,7 @@ export default function App() {
     setActiveIndex(0);
     setCaptureError(null);
     setAwaitingStart(false);
+    setIsMarking(false);
     setConfirmingResetTimings(false);
   }
 
@@ -152,6 +185,7 @@ export default function App() {
     setActiveIndex(0);
     setCaptureError(null);
     setAwaitingStart(false);
+    setIsMarking(false);
     setConfirmingReset(false);
     setConfirmingResetTimings(false);
     setConfirmingResetAll(false);
@@ -167,6 +201,7 @@ export default function App() {
     setActiveIndex(0);
     setCaptureError(null);
     setAwaitingStart(false);
+    setIsMarking(false);
     setConfirmingReset(false);
     setConfirmingResetTimings(false);
     setConfirmingResetAll(false);
@@ -302,6 +337,8 @@ export default function App() {
             videoUrl={videoUrl}
             videoRef={videoRef}
             onFileSelected={handleFileSelected}
+            onSeek={handleVideoSeek}
+            onTimeUpdate={handleVideoTimeUpdate}
             showReselectHint={restored && !videoUrl}
           />
           {phase === 'timing' && activeLine && videoUrl && (
