@@ -39,7 +39,7 @@ interface Props {
   videoUrl: string | null;
   videoRef: RefObject<HTMLVideoElement | null>;
   onFileSelected: (file: File) => void;
-  onSeek?: () => void;
+  onSeek?: (phase: 'seeking' | 'seeked') => void;
   onTimeUpdate?: () => void;
   showReselectHint: boolean;
 }
@@ -123,8 +123,8 @@ export function VideoPanel({
         ref={videoRef}
         src={videoUrl}
         controls
-        onSeeking={onSeek}
-        onSeeked={onSeek}
+        onSeeking={() => onSeek?.('seeking')}
+        onSeeked={() => onSeek?.('seeked')}
         onTimeUpdate={onTimeUpdate}
       />
     </section>

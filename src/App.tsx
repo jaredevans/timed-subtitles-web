@@ -39,6 +39,7 @@ export default function App() {
   const [restored, setRestored] = useState(false);
   const [exporting, setExporting] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const ignoreSeekToRef = useRef<number | null>(null);
 
   useEffect(() => {
     const saved = loadState();
@@ -111,11 +112,31 @@ export default function App() {
     setCaptureError(null);
     setAwaitingStart(false);
     setIsMarking(false);
+
+    const line = lines[index];
+    const video = videoRef.current;
+    if (video && line && line.start !== null) {
+      video.pause();
+      const target = Number.isFinite(video.duration)
+        ? Math.min(Math.max(0, line.start), video.duration)
+        : Math.max(0, line.start);
+      ignoreSeekToRef.current = target;
+      video.currentTime = target;
+    }
   }
 
-  function handleVideoSeek() {
+  function handleVideoSeek(seekPhase: 'seeking' | 'seeked') {
     const video = videoRef.current;
     if (!video || phase !== 'timing') return;
+
+    if (ignoreSeekToRef.current !== null) {
+      if (Math.abs(video.currentTime - ignoreSeekToRef.current) < 0.05) {
+        if (seekPhase === 'seeked') ignoreSeekToRef.current = null;
+        return;
+      }
+      ignoreSeekToRef.current = null;
+    }
+
     const matched = findCaptionIndexAtTime(lines, video.currentTime);
     if (matched === null || matched === activeIndex) return;
     setActiveIndex(matched);
